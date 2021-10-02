@@ -134,11 +134,11 @@ func (rb *RingBuffer) nextRead() reflect.Value {
 // handler入参可以传入回调函数或者channel
 func (rb *RingBuffer) ReadLoop(handler interface{}) {
 	rb.ReadLoopConditional(handler, func() bool {
-		return rb.Err() == nil && *rb.Flag != 2
+		return rb.Err() == nil && atomic.LoadInt32(rb.Flag) != 2
 	})
 }
 
-// goon判断函数用来判断是否继续读取,返回false将终止循环
+// ReadLoopConditional goon判断函数用来判断是否继续读取,返回false将终止循环
 func (rb *RingBuffer) ReadLoopConditional(handler interface{}, goon func() bool) {
 	switch t := reflect.ValueOf(handler); t.Kind() {
 	case reflect.Chan:
